@@ -4,18 +4,25 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 9092);
 
-  // const microservice = app.connectMicroservice<MicroserviceOptions>({
-  //     transport: Transport.KAFKA,
-  //     options: {
-  //         client: {
-  //             brokers: ['localhost:9092'],
-  //         },
-  //     },
-  // });
+  const microservice = app.connectMicroservice<MicroserviceOptions>({
+      transport: Transport.KAFKA,
+      options: {
+          client: {
+              brokers: ['localhost:9092'],
+          }
+          ,consumer: {
+            groupId: 'my-consumer-group',
+          },
+      },
+  });
 
-  // await app.startAllMicroservices();
-  // await app.listen(9092);
+  try{
+    await app.startAllMicroservices();
+    await app.listen(process.env.PORT ?? 9090);
+    console.log("Connected to Microservices")
+  }catch(error){
+    console.error('Error at starting microservices:', error);
+  }
 }
 bootstrap();
